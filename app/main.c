@@ -30,6 +30,7 @@
 #include "comtest.h"
 #include "oled.h"
 #include "semphr.h"
+#include "oo_oled.h"
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
   */
@@ -41,6 +42,7 @@
 #define RS422_TASK_PRIORITY				( tskIDLE_PRIORITY + 3 )
 #define RIN_TASK_PRIORITY				( tskIDLE_PRIORITY + 5 )
 #define OLED091_TASK_PRIORITY           ( tskIDLE_PRIORITY + 1 )
+#define OLED242_TASK_PRIORITY           ( tskIDLE_PRIORITY + 4 )
 
 /* Baud rate used by the comtest tasks. */
 #define mainCOM_TEST_BAUD_RATE		( 115200 )
@@ -62,6 +64,7 @@ void start_led_task(UBaseType_t prio);
 void start_rin_task(UBaseType_t prio);
 void start_rs422_task(UBaseType_t prio);
 void start_oled091_task(UBaseType_t prio);
+void start_oled242_task(UBaseType_t prio);
 
 static void prvSetupHardware( void );
 /* Private functions ---------------------------------------------------------*/
@@ -118,6 +121,7 @@ int main(void)
         start_rin_task(RIN_TASK_PRIORITY);
         start_oled091_task(OLED091_TASK_PRIORITY);
     }
+    start_oled242_task(OLED242_TASK_PRIORITY);
     //start_rs422_task(RS422_TASK_PRIORITY);
     vAltStartComTestTasks( RS422_TASK_PRIORITY, mainCOM_TEST_BAUD_RATE, mainCOM_TEST_LED );
     /* Start the scheduler. */
@@ -132,10 +136,26 @@ int main(void)
 #define RS422_STACK_SIZE	        ( ( unsigned short ) 128 )
 #define RS422_RECEIVE_STACK_SIZE    ( ( unsigned short ) 128 )
 #define OLED091_STACK_SIZE          ( ( unsigned short ) 256 )
+#define OLED242_STACK_SIZE          ( ( unsigned short ) 256 )
+static void oled242_task(void *pvParameters )
+{
+        oled_clear(&oled_242);
+	( void ) pvParameters;
+    oled_show_number(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,hsize,&oled_242);
+	for(;;)
+	{
+        //OLED_Clear();
+        //OLED_ShowCHinese(hx,hy,0,0);//ÖÐ
+        //xSemaphoreTake( xSemaphore, portMAX_DELAY );
+        oled_show_number(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,hsize,&oled_242);
+		vTaskDelay( 100 / portTICK_PERIOD_MS ); /* Delay 100 ms */
+	}
+}
 static void oled091_task(void *pvParameters )
 {
     //uint8_t t = '9';
-        OLED_Clear();
+        //OLED_Clear();
+    oled_clear(&oled_091);
         //LED_ON;
 		//OLED_ShowCHinese(0,0,0,0);//ÖÐ
 		//OLED_ShowCHinese(18,0,1,0);//¾°
@@ -157,13 +177,14 @@ static void oled091_task(void *pvParameters )
     //OLED_ShowNum(hx,hy,h,hlen,hsize);
         //OLED_Clear();
 	( void ) pvParameters;
-    OLED_ShowNum(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,hsize);
+    //OLED_ShowNum(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,hsize);
+    oled_show_number(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,hsize,&oled_091);
 	for(;;)
 	{
         //OLED_Clear();
         //OLED_ShowCHinese(hx,hy,0,0);//ÖÐ
         xSemaphoreTake( xSemaphore, portMAX_DELAY );
-        OLED_ShowNum(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,hsize);
+        oled_show_number(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,hsize,&oled_091);
 		//vTaskDelay( 100 / portTICK_PERIOD_MS ); /* Delay 100 ms */
 	}
 }
@@ -225,6 +246,7 @@ static void rs422_receive_task(void *pvParameters )
 //		vTaskDelay( 1000 / portTICK_PERIOD_MS ); /* Delay 1 s */
 //	}
 //}
+
 void start_led_task(UBaseType_t prio)
 {
     xTaskCreate( led_task, "LED", LED_STACK_SIZE, NULL, prio, ( TaskHandle_t * ) NULL );
@@ -245,6 +267,11 @@ void start_rs422_receive_task(UBaseType_t prio)
 void start_oled091_task(UBaseType_t prio)
 {
     xTaskCreate( oled091_task, "OLED091", OLED091_STACK_SIZE, NULL, prio, ( TaskHandle_t * ) NULL );
+	//xTaskCreate( led_task1, "LED1", LED_STACK_SIZE, NULL, prio, ( TaskHandle_t * ) NULL );
+}
+void start_oled242_task(UBaseType_t prio)
+{
+    xTaskCreate( oled242_task, "OLED242", OLED242_STACK_SIZE, NULL, prio, ( TaskHandle_t * ) NULL );
 	//xTaskCreate( led_task1, "LED1", LED_STACK_SIZE, NULL, prio, ( TaskHandle_t * ) NULL );
 }
 /**

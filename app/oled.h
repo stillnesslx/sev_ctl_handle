@@ -61,8 +61,11 @@
 #define OLED_DC_Clr() GPIO_ResetBits(GPIOB,GPIO_Pin_11)//DC
 #define OLED_DC_Set() GPIO_SetBits(GPIOB,GPIO_Pin_11)
  		     
-#define OLED_CS_Clr()  GPIO_ResetBits(GPIOB,GPIO_Pin_12)//CS
-#define OLED_CS_Set()  GPIO_SetBits(GPIOB,GPIO_Pin_12)
+#define OLED_CS_Clr()       do{GPIO_SetBits(GPIOB,GPIO_Pin_8);GPIO_ResetBits(GPIOB,GPIO_Pin_12);}while(0)//CS
+#define OLED_CS_Set()       do{GPIO_SetBits(GPIOB,GPIO_Pin_12);}while(0)
+
+#define OLED242_CS_Clr()    do{GPIO_SetBits(GPIOB,GPIO_Pin_12);GPIO_ResetBits(GPIOB,GPIO_Pin_8);}while(0)//CS
+#define OLED242_CS_Set()    do{GPIO_SetBits(GPIOB,GPIO_Pin_8);}while(0)
 
 #define OLED_CMD  0	//Ð´ÃüÁî
 #define OLED_DATA 1	//Ð´Êý¾Ý
@@ -83,6 +86,11 @@ void OLED_ShowString(u8 x,u8 y, u8 *p);
 void OLED_Set_Pos(unsigned char x, unsigned char y);
 void OLED_ShowCHinese(u8 x,u8 y,u8 no,u8 mode);
 void OLED_DrawBMP(unsigned char x0, unsigned char y0,unsigned char x1, unsigned char y1,unsigned char BMP[]);
+
+extern void SPI2_NRF_SendByte(unsigned char byte);
+extern void uDelay(unsigned char l);
+extern u32 oled_pow(u8 m,u8 n);
+
 #endif  
 	 
 

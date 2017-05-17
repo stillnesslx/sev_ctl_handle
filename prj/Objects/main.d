@@ -46,3 +46,4 @@
 .\objects\main.o: d:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 .\objects\main.o: ..\lib\freeRTOS\include\semphr.h
 .\objects\main.o: ..\lib\freeRTOS\include\queue.h
+.\objects\main.o: ..\app\oo_oled.h
