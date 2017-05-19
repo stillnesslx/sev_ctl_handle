@@ -443,6 +443,16 @@
               <FileType>1</FileType>
               <FilePath>..\app\oled.c</FilePath>
             </File>
+            <File>
+              <FileName>oo_oled.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app\oo_oled.c</FilePath>
+            </File>
+            <File>
+              <FileName>oledfont.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\app\oledfont.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

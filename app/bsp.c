@@ -13,6 +13,7 @@ __IO uint16_t ADCConvertedValue;
 #define ADC1_DR_Address    ((uint32_t)0x4001244C)
 
 struct di_data di_value;
+struct display_data dsp_data;
 struct com_send_data com_sdata = {1,1,{0,0},0};
 
 void di_init(u32 init);
@@ -53,7 +54,7 @@ void di_init(u32 init)
 {
     u16 i;
     di_value.di_new = 0;
-    di_value.di_filtered = init;//gen 7; mot 0x1ef11
+    di_value.di_filtered = init;//
     for(i=0;i<DI_CHANNEL_NUM;i++)
     {
         di_value.di_timer[i] = 0;
@@ -282,115 +283,116 @@ void spi_init(void)
 	delay_ms(200);
 	OLED_RST_Set(); 
 					  
-    oled_091.wr_byte(0xAE,OLED_CMD);//关闭显示
+    OLED_WR_Byte(0xAE,OLED_CMD);//关闭显示
 	
-	oled_091.wr_byte(0x40,OLED_CMD);//---set low column address
-	oled_091.wr_byte(0xB0,OLED_CMD);//---set high column address
+	OLED_WR_Byte(0x40,OLED_CMD);//---set low column address
+	OLED_WR_Byte(0xB0,OLED_CMD);//---set high column address
 
-	oled_091.wr_byte(0xC8,OLED_CMD);//-not offset
+	OLED_WR_Byte(0xC8,OLED_CMD);//-not offset
 
-	oled_091.wr_byte(0x81,OLED_CMD);//设置对比度
-	oled_091.wr_byte(0xff,OLED_CMD);
+	OLED_WR_Byte(0x81,OLED_CMD);//设置对比度
+	OLED_WR_Byte(0xff,OLED_CMD);
 
-	oled_091.wr_byte(0xa1,OLED_CMD);//段重定向设置
+	OLED_WR_Byte(0xa1,OLED_CMD);//段重定向设置
 
-	oled_091.wr_byte(0xa6,OLED_CMD);//
+	OLED_WR_Byte(0xa6,OLED_CMD);//
 	
-	oled_091.wr_byte(0xa8,OLED_CMD);//设置驱动路数
-	oled_091.wr_byte(0x1f,OLED_CMD);
+	OLED_WR_Byte(0xa8,OLED_CMD);//设置驱动路数
+	OLED_WR_Byte(0x1f,OLED_CMD);
 	
-	oled_091.wr_byte(0xd3,OLED_CMD);
-	oled_091.wr_byte(0x00,OLED_CMD);
+	OLED_WR_Byte(0xd3,OLED_CMD);
+	OLED_WR_Byte(0x00,OLED_CMD);
 	
-	oled_091.wr_byte(0xd5,OLED_CMD);
-	oled_091.wr_byte(0xf0,OLED_CMD);
+	OLED_WR_Byte(0xd5,OLED_CMD);
+	OLED_WR_Byte(0xf0,OLED_CMD);
 	
-	oled_091.wr_byte(0xd9,OLED_CMD);
-	oled_091.wr_byte(0x22,OLED_CMD);
+	OLED_WR_Byte(0xd9,OLED_CMD);
+	OLED_WR_Byte(0x22,OLED_CMD);
 	
-	oled_091.wr_byte(0xda,OLED_CMD);
-	oled_091.wr_byte(0x02,OLED_CMD);
+	OLED_WR_Byte(0xda,OLED_CMD);
+	OLED_WR_Byte(0x02,OLED_CMD);
 	
-	oled_091.wr_byte(0xdb,OLED_CMD);
-	oled_091.wr_byte(0x49,OLED_CMD);
+	OLED_WR_Byte(0xdb,OLED_CMD);
+	OLED_WR_Byte(0x49,OLED_CMD);
 	
-	oled_091.wr_byte(0x8d,OLED_CMD);
-	oled_091.wr_byte(0x14,OLED_CMD);
+	OLED_WR_Byte(0x8d,OLED_CMD);
+	OLED_WR_Byte(0x14,OLED_CMD);
 	
-	oled_091.wr_byte(0xaf,OLED_CMD);
+	OLED_WR_Byte(0xaf,OLED_CMD);
     
-    oled_clear(&oled_091);
-	oled_set_pos(0,0,&oled_091); 
-    ///////////////////////////////////////////////
+    OLED_Clear();
+	OLED_Set_Pos(0,0); 
+//////////////////////////////////////////oled 091///////////////////////////////
 
-//    oled_242.wr_byte(0xAE,OLED_CMD);//关闭显示
+//    oled_242_wr_byte(0xAE,OLED_CMD);//关闭显示
 //	
-//	oled_242.wr_byte(0x40,OLED_CMD);//---set low column address
-//	oled_242.wr_byte(0xB0,OLED_CMD);//---set high column address
+//	oled_242_wr_byte(0x40,OLED_CMD);//---set low column address
+//	oled_242_wr_byte(0xB0,OLED_CMD);//---set high column address
 
-//	oled_242.wr_byte(0xC8,OLED_CMD);//-not offset
+//	oled_242_wr_byte(0xC8,OLED_CMD);//-not offset
 
-//	oled_242.wr_byte(0x81,OLED_CMD);//设置对比度
-//	oled_242.wr_byte(0xff,OLED_CMD);
+//	oled_242_wr_byte(0x81,OLED_CMD);//设置对比度
+//	oled_242_wr_byte(0xff,OLED_CMD);
 
-//	oled_242.wr_byte(0xa1,OLED_CMD);//段重定向设置
+//	oled_242_wr_byte(0xa1,OLED_CMD);//段重定向设置
 
-//	oled_242.wr_byte(0xa6,OLED_CMD);//
+//	oled_242_wr_byte(0xa6,OLED_CMD);//
 //	
-//	oled_242.wr_byte(0xa8,OLED_CMD);//设置驱动路数
-//	oled_242.wr_byte(0x1f,OLED_CMD);
+//	oled_242_wr_byte(0xa8,OLED_CMD);//设置驱动路数
+//	oled_242_wr_byte(0x1f,OLED_CMD);
 //	
-//	oled_242.wr_byte(0xd3,OLED_CMD);
-//	oled_242.wr_byte(0x00,OLED_CMD);
+//	oled_242_wr_byte(0xd3,OLED_CMD);
+//	oled_242_wr_byte(0x00,OLED_CMD);
 //	
-//	oled_242.wr_byte(0xd5,OLED_CMD);
-//	oled_242.wr_byte(0xf0,OLED_CMD);
+//	oled_242_wr_byte(0xd5,OLED_CMD);
+//	oled_242_wr_byte(0xf0,OLED_CMD);
 //	
-//	oled_242.wr_byte(0xd9,OLED_CMD);
-//	oled_242.wr_byte(0x22,OLED_CMD);
+//	oled_242_wr_byte(0xd9,OLED_CMD);
+//	oled_242_wr_byte(0x22,OLED_CMD);
 //	
-//	oled_242.wr_byte(0xda,OLED_CMD);
-//	oled_242.wr_byte(0x02,OLED_CMD);
+//	oled_242_wr_byte(0xda,OLED_CMD);
+//	oled_242_wr_byte(0x02,OLED_CMD);
 //	
-//	oled_242.wr_byte(0xdb,OLED_CMD);
-//	oled_242.wr_byte(0x49,OLED_CMD);
+//	oled_242_wr_byte(0xdb,OLED_CMD);
+//	oled_242_wr_byte(0x49,OLED_CMD);
 //	
-//	oled_242.wr_byte(0x8d,OLED_CMD);
-//	oled_242.wr_byte(0x14,OLED_CMD);
+//	oled_242_wr_byte(0x8d,OLED_CMD);
+//	oled_242_wr_byte(0x14,OLED_CMD);
 //	
-//	oled_242.wr_byte(0xaf,OLED_CMD);
-    oled_242.wr_byte(0xAE,OLED_CMD);//--turn off oled panel
-    oled_242.wr_byte(0x00,OLED_CMD);//---set low column address
-    oled_242.wr_byte(0x10,OLED_CMD);//---set high column address
-    oled_242.wr_byte(0x40,OLED_CMD);//--set start line address  Set Mapping RAM Display Start Line (0x00~0x3F)
-    oled_242.wr_byte(0x81,OLED_CMD);//--set contrast control register
-    oled_242.wr_byte(0xCF,OLED_CMD); // Set SEG Output Current Brightness
-    oled_242.wr_byte(0xA1,OLED_CMD);//--Set SEG/Column Mapping     0xa0???? 0xa1??
-    oled_242.wr_byte(0xC8,OLED_CMD);//Set COM/Row Scan Direction   0xc0???? 0xc8??
-    oled_242.wr_byte(0xA6,OLED_CMD);//--set normal display
-    oled_242.wr_byte(0xA8,OLED_CMD);//--set multiplex ratio(1 to 64)
-    oled_242.wr_byte(0x3f,OLED_CMD);//--1/64 duty
-    oled_242.wr_byte(0xD3,OLED_CMD);//-set display offset	Shift Mapping RAM Counter (0x00~0x3F)
-    oled_242.wr_byte(0x00,OLED_CMD);//-not offset
-    oled_242.wr_byte(0xd5,OLED_CMD);//--set display clock divide ratio/oscillator frequency
-    oled_242.wr_byte(0x80,OLED_CMD);//--set divide ratio, Set Clock as 100 Frames/Sec
-    oled_242.wr_byte(0xD9,OLED_CMD);//--set pre-charge period
-    oled_242.wr_byte(0xF1,OLED_CMD);//Set Pre-Charge as 15 Clocks & Discharge as 1 Clock
-    oled_242.wr_byte(0xDA,OLED_CMD);//--set com pins hardware configuration
-    oled_242.wr_byte(0x12,OLED_CMD);
-    oled_242.wr_byte(0xDB,OLED_CMD);//--set vcomh
-    oled_242.wr_byte(0x40,OLED_CMD);//Set VCOM Deselect Level
-    oled_242.wr_byte(0x20,OLED_CMD);//-Set Page Addressing Mode (0x00/0x01/0x02)
-    oled_242.wr_byte(0x02,OLED_CMD);//
-    oled_242.wr_byte(0x8D,OLED_CMD);//--set Charge Pump enable/disable
-    oled_242.wr_byte(0x14,OLED_CMD);//--set(0x10) disable
-    oled_242.wr_byte(0xA4,OLED_CMD);// Disable Entire Display On (0xa4/0xa5)
-    oled_242.wr_byte(0xA6,OLED_CMD);// Disable Inverse Display On (0xa6/a7) 
-    oled_242.wr_byte(0xAF,OLED_CMD);//--turn on oled panel
+//	oled_242_wr_byte(0xaf,OLED_CMD);
+//////////////////////////////////////////oled 242///////////////////////////////
+    oled_242_wr_byte(0xAE,OLED_CMD);//--turn off oled panel
+    oled_242_wr_byte(0x00,OLED_CMD);//---set low column address
+    oled_242_wr_byte(0x10,OLED_CMD);//---set high column address
+    oled_242_wr_byte(0x40,OLED_CMD);//--set start line address  Set Mapping RAM Display Start Line (0x00~0x3F)
+    oled_242_wr_byte(0x81,OLED_CMD);//--set contrast control register
+    oled_242_wr_byte(0xCF,OLED_CMD); // Set SEG Output Current Brightness
+    oled_242_wr_byte(0xA1,OLED_CMD);//--Set SEG/Column Mapping     0xa0???? 0xa1??
+    oled_242_wr_byte(0xC8,OLED_CMD);//Set COM/Row Scan Direction   0xc0???? 0xc8??
+    oled_242_wr_byte(0xA6,OLED_CMD);//--set normal display
+    oled_242_wr_byte(0xA8,OLED_CMD);//--set multiplex ratio(1 to 64)
+    oled_242_wr_byte(0x3f,OLED_CMD);//--1/64 duty
+    oled_242_wr_byte(0xD3,OLED_CMD);//-set display offset	Shift Mapping RAM Counter (0x00~0x3F)
+    oled_242_wr_byte(0x00,OLED_CMD);//-not offset
+    oled_242_wr_byte(0xd5,OLED_CMD);//--set display clock divide ratio/oscillator frequency
+    oled_242_wr_byte(0x80,OLED_CMD);//--set divide ratio, Set Clock as 100 Frames/Sec
+    oled_242_wr_byte(0xD9,OLED_CMD);//--set pre-charge period
+    oled_242_wr_byte(0xF1,OLED_CMD);//Set Pre-Charge as 15 Clocks & Discharge as 1 Clock
+    oled_242_wr_byte(0xDA,OLED_CMD);//--set com pins hardware configuration
+    oled_242_wr_byte(0x12,OLED_CMD);
+    oled_242_wr_byte(0xDB,OLED_CMD);//--set vcomh
+    oled_242_wr_byte(0x40,OLED_CMD);//Set VCOM Deselect Level
+    oled_242_wr_byte(0x20,OLED_CMD);//-Set Page Addressing Mode (0x00/0x01/0x02)
+    oled_242_wr_byte(0x02,OLED_CMD);//
+    oled_242_wr_byte(0x8D,OLED_CMD);//--set Charge Pump enable/disable
+    oled_242_wr_byte(0x14,OLED_CMD);//--set(0x10) disable
+    oled_242_wr_byte(0xA4,OLED_CMD);// Disable Entire Display On (0xa4/0xa5)
+    oled_242_wr_byte(0xA6,OLED_CMD);// Disable Inverse Display On (0xa6/a7) 
+    oled_242_wr_byte(0xAF,OLED_CMD);//--turn on oled panel
 	
-	oled_242.wr_byte(0xAF,OLED_CMD); /*display ON*/ 
-	oled_clear(&oled_242);
-	oled_set_pos(0,0,&oled_242); 	
+	oled_242_wr_byte(0xAF,OLED_CMD); /*display ON*/ 
+	oled_clear();
+	oled_set_pos(0,0);
 }
 void delay_ms(uint16_t t)
 {

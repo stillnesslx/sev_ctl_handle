@@ -75,7 +75,25 @@ struct com_send_data
     }data;
     uint16_t sum;
 };
+struct display_data
+{
+    uint16_t latitude;
+    uint16_t longitude;
+    uint16_t pitch;
+    uint16_t yaw;
+    uint16_t roll;
+    uint16_t high;
+    uint16_t mode;
+    uint16_t status;
+    uint16_t battery;
+    uint16_t voltage;
+    uint16_t current;
+    uint16_t tempt;
+    uint16_t alarm;
+};
 extern struct di_data di_value;
+extern struct display_data dsp_data;
+
 extern void read_di(struct di_data *p);
 extern void bsp_init(void);
 void delay_ms(uint16_t t);

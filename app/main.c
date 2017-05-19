@@ -137,56 +137,67 @@ int main(void)
 #define RS422_RECEIVE_STACK_SIZE    ( ( unsigned short ) 128 )
 #define OLED091_STACK_SIZE          ( ( unsigned short ) 256 )
 #define OLED242_STACK_SIZE          ( ( unsigned short ) 256 )
+    
+
+extern uint8_t POS_X_HIGH,POS_Y_HIGH;
+uint8_t oled_cmd = 0;
+char chr_test = 82;
 static void oled242_task(void *pvParameters )
 {
-        oled_clear(&oled_242);
 	( void ) pvParameters;
-    oled_show_number(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,hsize,&oled_242);
+    oled_clear();
+    oled_init_display();
+    oled_show_number(POS_X_HIGHV,POS_Y_HIGHV,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,12);
 	for(;;)
 	{
         //OLED_Clear();
         //OLED_ShowCHinese(hx,hy,0,0);//中
         //xSemaphoreTake( xSemaphore, portMAX_DELAY );
-        oled_show_number(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,hsize,&oled_242);
+        if(1 == oled_cmd)
+        {
+            oled_cmd = 0;
+            oled_clear();
+        }
+        else if(2 == oled_cmd)
+        {
+            oled_cmd = 0;
+            oled_init_display();
+        }
+        oled_show_number(POS_X_LATV,POS_Y_LATV,dsp_data.latitude,2,12);
+        oled_show_number(POS_X_LONGV,POS_Y_LONGV,dsp_data.longitude,2,12);
+        oled_show_number(POS_X_ATTPV,POS_Y_ATTPV,dsp_data.pitch,2,12);
+        oled_show_number(POS_X_ATTYV,POS_Y_ATTYV,dsp_data.yaw,2,12);
+        oled_show_number(POS_X_ATTRV,POS_Y_ATTRV,dsp_data.roll,2,12);
+        oled_show_number(POS_X_HIGHV,POS_Y_HIGHV,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,12);
+        
+        oled_show_number(POS_X_MODEV,POS_Y_MODEV,dsp_data.mode,2,12);
+        oled_show_number(POS_X_STATV,POS_Y_STATV,dsp_data.status,2,12);
+        oled_show_number(POS_X_BATV,POS_Y_BATV,dsp_data.battery,2,12);
+        oled_show_number(POS_X_VOLTV,POS_Y_VOLTV,dsp_data.voltage,3,12);
+        oled_show_number(POS_X_CURRV,POS_Y_CURRV,dsp_data.current,3,12);
+        oled_show_number(POS_X_TEMPV,POS_Y_TEMPV,dsp_data.tempt,2,12);
+        oled_show_number(POS_X_ALAMV,POS_Y_ALAMV,dsp_data.alarm,2,12);
+        oled_show_char(108,6,chr_test);
+        
+
 		vTaskDelay( 100 / portTICK_PERIOD_MS ); /* Delay 100 ms */
 	}
 }
 static void oled091_task(void *pvParameters )
 {
-    //uint8_t t = '9';
-        //OLED_Clear();
-    oled_clear(&oled_091);
-        //LED_ON;
-		//OLED_ShowCHinese(0,0,0,0);//中
-		//OLED_ShowCHinese(18,0,1,0);//景
-		//OLED_ShowCHinese(36,0,2,0);//园
-		//OLED_ShowCHinese(54,0,3,0);//电
-		//OLED_ShowCHinese(72,0,4,0);//子
-		//OLED_ShowCHinese(90,0,5,0);//科
-		//OLED_ShowCHinese(108,0,6,0);//技
-		//OLED_ShowString(0,2,"0.91' OLED TEST");
-		//OLED_ShowString(8,2,"ZHONGJINGYUAN");  
-        //OLED_ShowString(20,4,"2014/05/01");  
-		//OLED_ShowString(0,6,"ASCII:");  
-		//OLED_ShowString(63,6,"CODE:");  
-		//OLED_ShowChar(48,6,t);//显示ASCII字符	   
-		//t++;
-		//if(t>'~')t=' ';
-		//OLED_ShowNum(54,0,h,3,16);//显示ASCII字符的码值
-        //OLED_ShowNum(54,0,60,3,16);
-    //OLED_ShowNum(hx,hy,h,hlen,hsize);
-        //OLED_Clear();
-	( void ) pvParameters;
+
+    OLED_Clear();
+    (void) pvParameters;
     //OLED_ShowNum(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,hsize);
-    oled_show_number(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,hsize,&oled_091);
-	for(;;)
-	{
+    OLED_ShowNum(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,hsize);
+    for(;;)
+    {
         //OLED_Clear();
         //OLED_ShowCHinese(hx,hy,0,0);//中
         xSemaphoreTake( xSemaphore, portMAX_DELAY );
-        oled_show_number(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,hsize,&oled_091);
-		//vTaskDelay( 100 / portTICK_PERIOD_MS ); /* Delay 100 ms */
-	}
+        OLED_ShowNum(hx,hy,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,hsize);
+        //vTaskDelay( 100 / portTICK_PERIOD_MS ); /* Delay 100 ms */
+    }
 }
 static void led_task(void *pvParameters )
 {
