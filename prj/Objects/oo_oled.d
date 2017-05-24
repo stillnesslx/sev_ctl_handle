@@ -32,3 +32,5 @@
 .\objects\oo_oled.o: ..\app\oled.h
 .\objects\oo_oled.o: d:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 .\objects\oo_oled.o: ..\app\oledfont.h
+.\objects\oo_oled.o: d:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\oo_oled.o: d:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h

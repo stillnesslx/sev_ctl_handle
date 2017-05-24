@@ -106,11 +106,11 @@ void vUARTInterruptHandler( void );
  */
 xComPortHandle xSerialPortInitMinimal( unsigned long ulWantedBaud, unsigned portBASE_TYPE uxQueueLength )
 {
-xComPortHandle xReturn;
-USART_InitTypeDef USART_InitStructure;
-NVIC_InitTypeDef NVIC_InitStructure;
-GPIO_InitTypeDef GPIO_InitStructure;
-USART_ClockInitTypeDef USART_ClockInitStructure;
+    xComPortHandle xReturn;
+    USART_InitTypeDef USART_InitStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStructure;
+    USART_ClockInitTypeDef USART_ClockInitStructure;
 	/* Create the queues used to hold Rx/Tx characters. */
 	xRxedChars = xQueueCreate( uxQueueLength, ( unsigned portBASE_TYPE ) sizeof( signed char ) );
 	xCharsForTx = xQueueCreate( uxQueueLength + 1, ( unsigned portBASE_TYPE ) sizeof( signed char ) );

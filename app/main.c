@@ -23,6 +23,7 @@
 #include "stm32f10x.h"
 //#include "stm32_eval.h"
 #include <stdio.h>
+#include <math.h>
 #include "bsp.h"
 #include "FreeRTOS.h"
 #include "task.h"
@@ -31,6 +32,8 @@
 #include "oled.h"
 #include "semphr.h"
 #include "oo_oled.h"
+#include "oledfont.h"  	
+#include <string.h>
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
   */
@@ -50,14 +53,17 @@
 information. */
 #define mainCOM_TEST_LED			( 3 )
 /* Private macro -------------------------------------------------------------*/
+#define DSP_MODE_EN 0
 /* Private variables ---------------------------------------------------------*/
 //char RxBuffer1[512];
 //uint8_t RxCounter1=0;
 
 u8 hx = 48,hy = 0,hlen = 3,hsize = 32;
 u32 h = 60;
+u8 test_en=0;
 const uint8_t high[3] = {50,100,150};
 SemaphoreHandle_t xSemaphore = NULL;
+
 /* Private function prototypes -----------------------------------------------*/
 
 void start_led_task(UBaseType_t prio);
@@ -114,6 +120,7 @@ int main(void)
   /* Add your application code here*/
     
     vSemaphoreCreateBinary( xSemaphore );
+
     bsp_init();
     start_led_task(LED_TASK_PRIORITY);
     if( xSemaphore != NULL )
@@ -123,7 +130,7 @@ int main(void)
     }
     start_oled242_task(OLED242_TASK_PRIORITY);
     //start_rs422_task(RS422_TASK_PRIORITY);
-    vAltStartComTestTasks( RS422_TASK_PRIORITY, mainCOM_TEST_BAUD_RATE, mainCOM_TEST_LED );
+    vAltStartComTestTasks( RS422_TASK_PRIORITY, mainCOM_TEST_BAUD_RATE, mainCOM_TEST_LED);
     /* Start the scheduler. */
     vTaskStartScheduler();
     /* Infinite loop */
@@ -137,17 +144,288 @@ int main(void)
 #define RS422_RECEIVE_STACK_SIZE    ( ( unsigned short ) 128 )
 #define OLED091_STACK_SIZE          ( ( unsigned short ) 256 )
 #define OLED242_STACK_SIZE          ( ( unsigned short ) 256 )
-    
 
+//    uint32_t latitude;
+//    uint32_t longitude;
+//    uint16_t pitch;
+//    uint16_t yaw;
+//    uint16_t roll;
+//    uint16_t high;
+//    uint16_t mode;
+//    uint16_t status;
+//    uint16_t battery;
+//    uint16_t voltage;
+//    uint16_t current;
+//    uint16_t tempt;
+//    uint16_t alarm;
+#define COM_REV_NUM_SYNC1       0
+#define COM_REV_NUM_SYNC2       1
+#define COM_REV_NUM_MSGID       2
+#define COM_REV_NUM_SRCID       3
+#define COM_REV_NUM_SQN         4
+#define COM_REV_NUM_LEN         6
+#define COM_REV_NUM_MSG         8
+
+
+u16 oled242_delay = 1000;
 extern uint8_t POS_X_HIGH,POS_Y_HIGH;
 uint8_t oled_cmd = 0;
 char chr_test = 82;
+u8 stat = 0;
+uint8_t com_rev_data_buf[COM_REV_FRM_LEN];
+//0xaa 0x44 0xc2 0x01 0x01 0x26 0x46 0xa1 0xaa 0x40 0x85 0x37 0x64 0xc0 0x08 0xbc 0x07 0xc0 0x07 0x83 0x01 0xf4 0x00 0x00 0x00 0x00 0x00 0x00 0x0e 0xd8 0x00 0xdc 0x08 0xe8 0x00 0x01 0x00 0x00
+//aa 44 c2 01 00 01 00 1c 46 a1 aa 40 85 37 64 c0 01 f4 07 83 08 bc 07 c0 00 01 00 01 0e d8 00 dc 05 78 00 00 0f d4 69 fa
+//aa 44
+//c2
+//01
+//00 01
+//00 1c
+//46 a1 aa 40
+//85 37 64 c0
+//01 f4
+//07 83
+//08 bc
+//07 c0
+//00 01
+//00 01
+//0e d8
+//00 dc
+//05 78
+//0e 12 25 50
+//
+void memcpy_word(u16 *src,u16 *det,u8 len)
+{
+    while(len--)
+    {
+        *src++ = *det++;
+    }
+}
+static void oled242_ch_task(void *pvParameters )
+{
+    //u8 stat = 0;
+    uint8_t rd_cnt=0;
+	( void ) pvParameters;
+    //oled_init_display();
+    //oled_show_number(POS_X_HIGHV,POS_Y_HIGHV,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,16);
+    //olde242_ch_init_display();
+
+	for(;;)
+	{
+        if(fifoBuf_getUsed(&com_fifo) > COM_DATA_LEN)
+        {
+            while((COM_DATA_SYNC1 != (com_rev_data_buf[0] = fifoBuf_getByte(&com_fifo))) || (COM_DATA_SYNC2 != (com_rev_data_buf[1] = fifoBuf_getByte(&com_fifo))))
+            {
+                 if(rd_cnt++ > COM_DATA_LEN)
+                 {
+                     break;
+                 }
+            }
+            if(rd_cnt > COM_DATA_LEN)
+            {
+                rd_cnt = 0;
+            }
+            else
+            {
+                uint8_t i;
+                uint32_t crc = 0,rcrc;
+                fifoBuf_getData(&com_fifo, &com_rev_data_buf[2], COM_REV_FRM_LEN-2);
+                for(i=0;i<COM_REV_FRM_LEN/4-1;i++)
+                {
+                    crc += *(uint32_t *)&com_rev_data_buf;
+                }
+                rcrc = SWAP32(*(uint32_t *)&com_rev_data_buf[COM_REV_FRM_LEN-4]);
+                if((COM_DATA_MSGID == com_rev_data_buf[2])
+                    && (COM_DATA_SRCID == com_rev_data_buf[3]) 
+                    && (COM_DATA_LEN == ((uint16_t)com_rev_data_buf[6]<<8) | com_rev_data_buf[7])
+                    && (crc == SWAP32(*(uint32_t *)&com_rev_data_buf[COM_REV_FRM_LEN-4])))
+                {
+                    //memcpy_word((u16 *)&dsp_data,(u16 *)&com_rev_data_buf[COM_REV_NUM_MSG],sizeof(struct display_data)/2);
+                    dsp_data.latitude = SWAP32(*(uint32_t *)&com_rev_data_buf[COM_REV_NUM_MSG]);
+                    dsp_data.longitude = SWAP32(*(uint32_t *)&com_rev_data_buf[COM_REV_NUM_MSG+4]);
+                    dsp_data.high = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+8]);
+                    dsp_data.yaw = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+10]);
+                    dsp_data.pitch = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+12]);
+                    dsp_data.roll = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+14]);
+                    dsp_data.mode = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+16]);
+                    dsp_data.alarm = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+18]);
+                    dsp_data.voltage = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+20]);
+                    dsp_data.current = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+22]);
+                    dsp_data.tempt = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+24]);
+                    //dsp_data.resv = SWAP16(*(uint16_t *)&com_rev_data_buf[COM_REV_NUM_MSG+26]);
+                }
+            }
+        }
+
+        //OLED_Clear();
+        //OLED_ShowCHinese(hx,hy,0,0);//中
+        //xSemaphoreTake( xSemaphore, portMAX_DELAY );
+//        if(1 == oled_cmd)
+//        {
+//            oled_cmd = 0;
+//            oled_clear();
+//        }
+//        else if(2 == oled_cmd)
+//        {
+//            oled_cmd = 0;
+//            //oled_init_display();
+//        }
+
+        if(0 == stat)
+        {
+            oled_clear();
+            //oled_show_char(POS_CH_MD_X+32,POS_CH_MD_Y,':',16,0,F8X16);
+
+            if(0 == dsp_data.mode)
+            {
+                oled_show_chinese(POS_CH_MD_X+0,POS_CH_MD_Y,4,0);//调
+                oled_show_chinese(POS_CH_MD_X+16,POS_CH_MD_Y,27,0);//试
+                oled_show_chinese(POS_CH_MD_X+32,POS_CH_MD_Y,23,0);//模
+                oled_show_chinese(POS_CH_MD_X+48,POS_CH_MD_Y,26,0);//式
+                oled_show_string(POS_CH_MD_X+64,POS_CH_MD_Y,"  ",16,F8X16);//
+            }
+            else if(1 == dsp_data.mode)
+            {
+                oled_show_chinese(POS_CH_MD_X+0,POS_CH_MD_Y,28,0);//手
+                oled_show_chinese(POS_CH_MD_X+16,POS_CH_MD_Y,5,0);//动
+                oled_show_chinese(POS_CH_MD_X+32,POS_CH_MD_Y,23,0);//模
+                oled_show_chinese(POS_CH_MD_X+48,POS_CH_MD_Y,26,0);//式
+                oled_show_string(POS_CH_MD_X+64,POS_CH_MD_Y,"  ",16,F8X16);//
+            }
+            else if(2 == dsp_data.mode)
+            {
+                oled_show_chinese(POS_CH_MD_X+0,POS_CH_MD_Y,0,0);//半
+                oled_show_chinese(POS_CH_MD_X+16,POS_CH_MD_Y,44,0);//自
+                oled_show_chinese(POS_CH_MD_X+32,POS_CH_MD_Y,5,0);//动
+                oled_show_chinese(POS_CH_MD_X+48,POS_CH_MD_Y,23,0);//模
+                oled_show_chinese(POS_CH_MD_X+64,POS_CH_MD_Y,26,0);//式
+            }
+            else if(3 == dsp_data.mode)
+            {
+                oled_show_chinese(POS_CH_MD_X+0,POS_CH_MD_Y,44,0);//自
+                oled_show_chinese(POS_CH_MD_X+16,POS_CH_MD_Y,5,0);//动
+                oled_show_chinese(POS_CH_MD_X+32,POS_CH_MD_Y,23,0);//模
+                oled_show_chinese(POS_CH_MD_X+48,POS_CH_MD_Y,26,0);//式
+                oled_show_string(POS_CH_MD_X+64,POS_CH_MD_Y,"  ",16,F8X16);//
+            }
+            else
+            {
+                //dsp_data.mode = 0;
+            }
+            if(0 == dsp_data.alarm)
+            {
+                oled_show_chinese(POS_CH_AL_X+0,POS_CH_AL_Y,47,0);//正
+                oled_show_chinese(POS_CH_AL_X+16,POS_CH_AL_Y,46,0);//常
+            }
+            else
+            {
+                oled_show_chinese(POS_CH_AL_X+0,POS_CH_AL_Y,45,0);//异
+                oled_show_chinese(POS_CH_AL_X+16,POS_CH_AL_Y,46,0);//常
+                oled_show_number(POS_CH_AL_X+32,POS_CH_AL_Y,dsp_data.alarm,16,F8X16);
+            }
+            oled_show_chinese(POS_CH_VT_X+0,POS_CH_VT_Y,3,0);//电
+            oled_show_chinese(POS_CH_VT_X+16,POS_CH_VT_Y,36,0);//压
+            //oled_show_char(POS_CH_VT_X+32,POS_CH_VT_Y,':',16,0,F8X16);
+            oled_show_string(POS_CH_VT_X+32,POS_CH_VT_Y,":     V",16,F8X16);
+            oled_show_float(POS_CH_VT_X+40,POS_CH_VT_Y,dsp_data.voltage/10.0f,16,F8X16,"%5.1f");
+
+            oled_show_chinese(POS_CH_CR_X+0,POS_CH_CR_Y,3,0);//电
+            oled_show_chinese(POS_CH_CR_X+16,POS_CH_CR_Y,21,0);//流
+            //oled_show_char(POS_CH_CR_X+32,POS_CH_CR_Y,':',16,0,F8X16);
+            oled_show_string(POS_CH_CR_X+32,POS_CH_CR_Y,":     A",16,F8X16);
+            oled_show_float(POS_CH_CR_X+40,POS_CH_CR_Y,dsp_data.current/10.0f,16,F8X16,"%5.1f");
+
+            oled_show_chinese(POS_CH_TP_X+0,POS_CH_TP_Y,33,0);//温
+            oled_show_chinese(POS_CH_TP_X+16,POS_CH_TP_Y,6,0);//度
+            //oled_show_char(POS_CH_TP_X+32,POS_CH_TP_Y,':',16,0,F8X16);
+            oled_show_string(POS_CH_TP_X+32,POS_CH_TP_Y,":      \x7f\x43",16,F8X16);
+            oled_show_float(POS_CH_TP_X+40,POS_CH_TP_Y,dsp_data.tempt/10.0f-100,16,F8X16,"%6.1f");
+            
+            //oled_show_number(POS_CH_ATT_X+72,POS_CH_ATT_Y,dsp_data.yaw,16,F6x8);
+            //oled_show_number(POS_X_LATV,POS_Y_LATV,(dsp_data.latitude & 0xff) >> 8,2,16);
+    //        oled_show_number(POS_X_LONGV,POS_Y_LONGV,(dsp_data.longitude & 0xff) >> 8,2,16);
+    //        oled_show_number(POS_X_LATV+18,POS_Y_LATV,dsp_data.latitude & 0xff,2,16);
+    //        oled_show_number(POS_X_LONGV+18,POS_Y_LONGV,dsp_data.longitude & 0xff,2,16);
+    //        oled_show_number(POS_X_ATTPV,POS_Y_ATTPV,dsp_data.pitch,2,16);
+    //        oled_show_number(POS_X_ATTYV,POS_Y_ATTYV,dsp_data.yaw,2,16);
+    //        oled_show_number(POS_X_ATTRV,POS_Y_ATTRV,dsp_data.roll,2,16);
+    //        oled_show_number(POS_X_HIGHV,POS_Y_HIGHV,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,16);
+    //        
+    //        oled_show_number(POS_X_MODEV,POS_Y_MODEV,dsp_data.mode,2,16);
+    //        oled_show_number(POS_X_STATV,POS_Y_STATV,dsp_data.status,2,16);
+    //        oled_show_number(POS_X_BATV,POS_Y_BATV,dsp_data.battery,2,16);
+    //        oled_show_number(POS_X_VOLTV,POS_Y_VOLTV,dsp_data.voltage,3,16);
+    //        oled_show_number(POS_X_CURRV,POS_Y_CURRV,dsp_data.current,3,16);
+    //        oled_show_number(POS_X_TEMPV,POS_Y_TEMPV,dsp_data.tempt,2,16);
+    //        oled_show_number(POS_X_ALAMV,POS_Y_ALAMV,dsp_data.alarm,2,16);
+    //        oled_show_char(108,6,chr_test,12,0);
+            if(test_en)
+            oled_show_char(96,4,chr_test,16,0,F8X16);
+            //stat = 1;
+        }
+        else if(1 == stat)
+        {
+            oled_clear();
+            oled_show_chinese(POS_CH_HI_X+0,POS_CH_HI_Y,9,0);//高
+            oled_show_chinese(POS_CH_HI_X+16,POS_CH_HI_Y,6,0);//度
+            oled_show_string(POS_CH_HI_X+32,POS_CH_HI_Y,":     m",16,F8X16);
+            //oled_show_char(POS_CH_HI_X+32,POS_CH_HI_Y,':',16,0,F8X16);
+            oled_show_float(POS_CH_HI_X+40,POS_CH_HI_Y,high[((di_value.di_filtered & 0x300) >> 8) -1]+(float)(ADCConvertedValue-2048)/2048.0f*50.0f,16,F8X16,"%5.1f");
+
+            oled_show_chinese(POS_CH_LAT_X+0,POS_CH_LAT_Y,18,0);//经
+            oled_show_chinese(POS_CH_LAT_X+16,POS_CH_LAT_Y,31,0);//纬
+            oled_show_chinese(POS_CH_LAT_X+32,POS_CH_LAT_Y,6,0);//度
+            oled_show_char(POS_CH_LAT_X+48,POS_CH_LAT_Y,':',16,0,F8X16);
+            oled_show_string(POS_CH_LAT_X,POS_CH_LAT_Y+2,"          \x7f",16,F8X16);
+            oled_show_float(POS_CH_LAT_X,POS_CH_LAT_Y+2,fabs(dsp_data.latitude/10000000.0f-90.0f),16,F8X16,"%10.7f");
+            oled_show_char(POS_CH_LAT_X+88,POS_CH_LAT_Y+2,(dsp_data.latitude/10000000.0f-90.0f)>0?'N':'S',16,0,F8X16);
+
+            oled_show_string(POS_CH_LAT_X,POS_CH_LAT_Y+4,"           \x7f",16,F8X16);
+            oled_show_float(POS_CH_LAT_X,POS_CH_LAT_Y+4,fabs(dsp_data.longitude/10000000.0f-180.0f),16,F8X16,"%11.7f");
+            oled_show_char(POS_CH_LAT_X+96,POS_CH_LAT_Y+4,(dsp_data.longitude/10000000.0f-180.0f)>0?'E':'W',16,0,F8X16);
+            //stat = 2;
+        }
+        else if(2 == stat)
+        {
+            oled_clear();
+            //oled_show_chinese(POS_CH_ATT_X+0,POS_CH_ATT_Y,30,0);//姿
+            //oled_show_chinese(POS_CH_ATT_X+16,POS_CH_ATT_Y,43,0);//态
+            oled_show_chinese(POS_CH_ATT_X+0,POS_CH_ATT_Y,13,0);//航
+            oled_show_chinese(POS_CH_ATT_X+16,POS_CH_ATT_Y,35,0);//向
+            oled_show_chinese(POS_CH_ATT_X+32,POS_CH_ATT_Y,16,0);//角
+            oled_show_char(POS_CH_ATT_X+48,POS_CH_ATT_Y,':',16,0,F8X16);
+            oled_show_string(POS_CH_ATT_X+56,POS_CH_ATT_Y,"     \x7f",16,F8X16);
+            oled_show_float(POS_CH_ATT_X+56,POS_CH_ATT_Y,dsp_data.yaw/10.0f-180,16,F8X16,"%5.1f");
+            
+            oled_show_chinese(POS_CH_ATT_X+0,POS_CH_ATT_Y+2,8,0);//俯
+            oled_show_chinese(POS_CH_ATT_X+16,POS_CH_ATT_Y+2,37,0);//仰
+            oled_show_chinese(POS_CH_ATT_X+32,POS_CH_ATT_Y+2,16,0);//角
+            oled_show_char(POS_CH_ATT_X+48,POS_CH_ATT_Y+2,':',16,0,F8X16);
+            oled_show_string(POS_CH_ATT_X+56,POS_CH_ATT_Y+2,"     \x7f",16,F8X16);
+            oled_show_float(POS_CH_ATT_X+56,POS_CH_ATT_Y+2,dsp_data.pitch/10.0f-180,16,F8X16,"%5.1f");
+            
+            oled_show_chinese(POS_CH_ATT_X+0,POS_CH_ATT_Y+4,14,0);//横
+            oled_show_chinese(POS_CH_ATT_X+16,POS_CH_ATT_Y+4,12,0);//滚
+            oled_show_chinese(POS_CH_ATT_X+32,POS_CH_ATT_Y+4,16,0);//角
+            oled_show_char(POS_CH_ATT_X+48,POS_CH_ATT_Y+4,':',16,0,F8X16);
+            oled_show_string(POS_CH_ATT_X+56,POS_CH_ATT_Y+4,"     \x7f",16,F8X16);
+            oled_show_float(POS_CH_ATT_X+56,POS_CH_ATT_Y+4,dsp_data.roll/10.0f-180,16,F8X16,"%5.1f");
+            //stat = 0;
+        }
+        else
+        {
+            stat = 0;
+        }
+		vTaskDelay( oled242_delay / portTICK_PERIOD_MS ); /* Delay 1000 ms */
+	}
+}
+
+
 static void oled242_task(void *pvParameters )
 {
 	( void ) pvParameters;
     oled_clear();
     oled_init_display();
-    oled_show_number(POS_X_HIGHV,POS_Y_HIGHV,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,12);
+    oled_show_number(POS_X_HIGHV,POS_Y_HIGHV,high[((di_value.di_filtered & 0x300) >> 8) -1],12,F6x8);
 	for(;;)
 	{
         //OLED_Clear();
@@ -163,21 +441,23 @@ static void oled242_task(void *pvParameters )
             oled_cmd = 0;
             oled_init_display();
         }
-        oled_show_number(POS_X_LATV,POS_Y_LATV,dsp_data.latitude,2,12);
-        oled_show_number(POS_X_LONGV,POS_Y_LONGV,dsp_data.longitude,2,12);
-        oled_show_number(POS_X_ATTPV,POS_Y_ATTPV,dsp_data.pitch,2,12);
-        oled_show_number(POS_X_ATTYV,POS_Y_ATTYV,dsp_data.yaw,2,12);
-        oled_show_number(POS_X_ATTRV,POS_Y_ATTRV,dsp_data.roll,2,12);
-        oled_show_number(POS_X_HIGHV,POS_Y_HIGHV,high[((di_value.di_filtered & 0x300) >> 8) -1],hlen,12);
+        oled_show_number(POS_X_LATV,POS_Y_LATV,(dsp_data.latitude & 0xff) >> 8,12,F6x8);
+        oled_show_number(POS_X_LONGV,POS_Y_LONGV,(dsp_data.longitude & 0xff) >> 8,12,F6x8);
+        oled_show_number(POS_X_LATV+18,POS_Y_LATV,dsp_data.latitude & 0xff,12,F6x8);
+        oled_show_number(POS_X_LONGV+18,POS_Y_LONGV,dsp_data.longitude & 0xff,12,F6x8);
+        oled_show_number(POS_X_ATTPV,POS_Y_ATTPV,dsp_data.pitch,12,F6x8);
+        oled_show_number(POS_X_ATTYV,POS_Y_ATTYV,dsp_data.yaw,12,F6x8);
+        oled_show_number(POS_X_ATTRV,POS_Y_ATTRV,dsp_data.roll,12,F6x8);
+        oled_show_number(POS_X_HIGHV,POS_Y_HIGHV,high[((di_value.di_filtered & 0x300) >> 8) -1],12,F6x8);
         
-        oled_show_number(POS_X_MODEV,POS_Y_MODEV,dsp_data.mode,2,12);
-        oled_show_number(POS_X_STATV,POS_Y_STATV,dsp_data.status,2,12);
-        oled_show_number(POS_X_BATV,POS_Y_BATV,dsp_data.battery,2,12);
-        oled_show_number(POS_X_VOLTV,POS_Y_VOLTV,dsp_data.voltage,3,12);
-        oled_show_number(POS_X_CURRV,POS_Y_CURRV,dsp_data.current,3,12);
-        oled_show_number(POS_X_TEMPV,POS_Y_TEMPV,dsp_data.tempt,2,12);
-        oled_show_number(POS_X_ALAMV,POS_Y_ALAMV,dsp_data.alarm,2,12);
-        oled_show_char(108,6,chr_test);
+        oled_show_number(POS_X_MODEV,POS_Y_MODEV,dsp_data.mode,12,F6x8);
+        //oled_show_number(POS_X_STATV,POS_Y_STATV,dsp_data.status,12,F6x8);
+        //oled_show_number(POS_X_BATV,POS_Y_BATV,dsp_data.battery,12,F6x8);
+        oled_show_number(POS_X_VOLTV,POS_Y_VOLTV,dsp_data.voltage,12,F6x8);
+        oled_show_number(POS_X_CURRV,POS_Y_CURRV,dsp_data.current,12,F6x8);
+        oled_show_number(POS_X_TEMPV,POS_Y_TEMPV,dsp_data.tempt,12,F6x8);
+        oled_show_number(POS_X_ALAMV,POS_Y_ALAMV,dsp_data.alarm,12,F6x8);
+        oled_show_char(108,6,chr_test,12,0,F6x8);
         
 
 		vTaskDelay( 100 / portTICK_PERIOD_MS ); /* Delay 100 ms */
@@ -282,7 +562,16 @@ void start_oled091_task(UBaseType_t prio)
 }
 void start_oled242_task(UBaseType_t prio)
 {
-    xTaskCreate( oled242_task, "OLED242", OLED242_STACK_SIZE, NULL, prio, ( TaskHandle_t * ) NULL );
+    if(1 == DSP_MODE_EN)
+    {
+        xTaskCreate( oled242_task, "OLED242", OLED242_STACK_SIZE, NULL, prio, ( TaskHandle_t * ) NULL );
+    }
+    else
+    {
+        xTaskCreate( oled242_ch_task, "OLED242", OLED242_STACK_SIZE, NULL, prio, ( TaskHandle_t * ) NULL );
+        //xTaskCreate( oled242_ch_task2, "OLED242_2", OLED242_STACK_SIZE, NULL, prio, ( TaskHandle_t * ) NULL );
+        //xTaskCreate( oled242_ch_task3, "OLED242_3", OLED242_STACK_SIZE, NULL, prio, ( TaskHandle_t * ) NULL );
+    }
 	//xTaskCreate( led_task1, "LED1", LED_STACK_SIZE, NULL, prio, ( TaskHandle_t * ) NULL );
 }
 /**

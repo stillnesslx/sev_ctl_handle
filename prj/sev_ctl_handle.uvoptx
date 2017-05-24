@@ -77,7 +77,7 @@
         <tvExpOptDlg>0</tvExpOptDlg>
         <IsCurrentTarget>1</IsCurrentTarget>
       </OPTFL>
-      <CpuCode>255</CpuCode>
+      <CpuCode>18</CpuCode>
       <Books>
         <Book>
           <Number>0</Number>
@@ -177,7 +177,7 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>di_value</ItemText>
+          <ItemText>di_value,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
@@ -212,7 +212,7 @@
         <Ww>
           <count>7</count>
           <WinNumber>1</WinNumber>
-          <ItemText>dsp_data</ItemText>
+          <ItemText>dsp_data,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>8</count>
@@ -238,6 +238,16 @@
           <count>12</count>
           <WinNumber>1</WinNumber>
           <ItemText>POS_X_LOGO,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>13</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>oled242_delay,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>14</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>stat</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

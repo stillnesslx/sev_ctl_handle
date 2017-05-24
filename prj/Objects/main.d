@@ -29,7 +29,9 @@
 .\objects\main.o: ..\lib\STM32F10x_StdPeriph_Driver\inc\stm32f10x_wwdg.h
 .\objects\main.o: ..\lib\STM32F10x_StdPeriph_Driver\inc\misc.h
 .\objects\main.o: d:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\objects\main.o: d:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
 .\objects\main.o: ..\app\bsp.h
+.\objects\main.o: ..\lib\alg\fifo_buffer.h
 .\objects\main.o: ..\lib\freeRTOS\include\FreeRTOS.h
 .\objects\main.o: d:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
 .\objects\main.o: ..\lib\freeRTOS\include\FreeRTOSConfig.h
@@ -47,3 +49,5 @@
 .\objects\main.o: ..\lib\freeRTOS\include\semphr.h
 .\objects\main.o: ..\lib\freeRTOS\include\queue.h
 .\objects\main.o: ..\app\oo_oled.h
+.\objects\main.o: ..\app\oledfont.h
+.\objects\main.o: d:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h

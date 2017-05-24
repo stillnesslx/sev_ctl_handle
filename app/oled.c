@@ -177,9 +177,9 @@ void OLED_ShowChar(u8 x,u8 y,u8 chr)
     for(i=0;i<6;i++)
     {
         if(!parm_sel)
-        OLED_WR_Byte(F6x8[c][i],OLED_DATA);
+        OLED_WR_Byte(F6x8[c*8+i],OLED_DATA);
         else
-        OLED_WR_Byte(~F6x8[c][i],OLED_DATA);
+        OLED_WR_Byte(~F6x8[c*8+i],OLED_DATA);
     }
 }
 
@@ -269,28 +269,28 @@ void OLED_ShowString(u8 x,u8 y,u8 *chr)
 }
 
 //ÏÔÊ¾ºº×Ö
-void OLED_ShowCHinese(u8 x,u8 y,u8 no,u8 mode)
-{      			    
-	u8 t,adder=0;
-	OLED_Set_Pos(x,y);	
-    for(t=0;t<16;t++)
-		{
-        if(!mode)			
-				OLED_WR_Byte(Hzk[2*no][t],OLED_DATA);
-				else
-				OLED_WR_Byte(~Hzk[2*no][t],OLED_DATA);
-				adder+=1;
-     }	
-		OLED_Set_Pos(x,y+1);	
-    for(t=0;t<16;t++)
-			{	
-				if(!mode)
-				OLED_WR_Byte(Hzk[2*no+1][t],OLED_DATA);
-				else
-				OLED_WR_Byte(~Hzk[2*no+1][t],OLED_DATA);
-				adder+=1;
-      }					
-}
+//void OLED_ShowCHinese(u8 x,u8 y,u8 no,u8 mode)
+//{      			    
+//	u8 t,adder=0;
+//	OLED_Set_Pos(x,y);	
+//    for(t=0;t<16;t++)
+//		{
+//        if(!mode)			
+//				OLED_WR_Byte(Hzk[2*no][t],OLED_DATA);
+//				else
+//				OLED_WR_Byte(~Hzk[2*no][t],OLED_DATA);
+//				adder+=1;
+//     }	
+//		OLED_Set_Pos(x,y+1);	
+//    for(t=0;t<16;t++)
+//			{	
+//				if(!mode)
+//				OLED_WR_Byte(Hzk[2*no+1][t],OLED_DATA);
+//				else
+//				OLED_WR_Byte(~Hzk[2*no+1][t],OLED_DATA);
+//				adder+=1;
+//      }
+//}
 /***********¹¦ÄÜÃèÊö£ºÏÔÊ¾ÏÔÊ¾BMPÍ¼Æ¬128¡Á64ÆðÊ¼µã×ø±ê(x,y),xµÄ·¶Î§0¡«127£¬yÎªÒ³µÄ·¶Î§0¡«7*****************/
 void OLED_DrawBMP(unsigned char x0, unsigned char y0,unsigned char x1, unsigned char y1,unsigned char BMP[])
 { 	
@@ -368,158 +368,158 @@ uint8_t x_buf[6];
 uint8_t t;
 char  ptr[20];
 int  a,b,c,d,e,f;
-void Menu(uint8_t index,float parameter,u8 page)
-{
-	
-	
-	for(t=0;t<6;t++)
-	{
-		x_buf[t]=0xff;
-	}
-	
-	x_buf[index]=0;
-  if(index<5)
-  x_buf[index+1]=3;
-	if(index<4)
-	x_buf[index+2]=6;
-	
-	parm_sel=page;//ÉèÖÃ²ÎÊýÒ³
-    
+//void Menu(uint8_t index,float parameter,u8 page)
+//{
+//	
+//	
+//	for(t=0;t<6;t++)
+//	{
+//		x_buf[t]=0xff;
+//	}
+//	
+//	x_buf[index]=0;
+//  if(index<5)
+//  x_buf[index+1]=3;
+//	if(index<4)
+//	x_buf[index+2]=6;
+//	
+//	parm_sel=page;//ÉèÖÃ²ÎÊýÒ³
+//    
 
-	 OLED_DrawBMP(13,0,32+13,2,BMP1);
-	
- if(x_buf[0]!=0xff)
- { 
-	 if(x_buf[0]==0) a=1 ;else a=0;
-	OLED_ShowCHinese(47,x_buf[0],22,a);//º½Ïò½Ç 1
-	OLED_ShowCHinese(63,x_buf[0],10,a);//º½Ïò½Ç 1
-  OLED_ShowCHinese(79,x_buf[0],11,a);
-  OLED_ShowCHinese(95,x_buf[0],9,a);
-	OLED_ShowCHinese(111,x_buf[0],22,a);//º½Ïò½Ç 1
- }
-	
- if(x_buf[1]!=0xff)
- {
-	  if(x_buf[1]==0) b=1;else b=0;
-	OLED_ShowCHinese(47,x_buf[1],22,b);//º½Ïò½Ç 1
-	OLED_ShowCHinese(63,x_buf[1],4,b);//¸©Ñö½Ç  2
-	OLED_ShowCHinese(79,x_buf[1],5,b);
-	OLED_ShowCHinese(95,x_buf[1],9,b);
-	OLED_ShowCHinese(111,x_buf[1],22,b);//º½Ïò½Ç 1
- }
- if(x_buf[2]!=0xff)
- {
-	if(x_buf[2]==0) c=1;else c=0;
-	OLED_ShowCHinese(47,x_buf[2],10,c);//º½Ïò½ÇËÙ¶È 3
-	OLED_ShowCHinese(63,x_buf[2],11,c);
-	OLED_ShowCHinese(79,x_buf[2],9,c);
-	OLED_ShowCHinese(95,x_buf[2],2,c);
-	OLED_ShowCHinese(111,x_buf[2],3,c);
- }
- 
- if(x_buf[3]!=0xff)
- {
-	if(x_buf[3]==0) d=1;else d=0;
-	OLED_ShowCHinese(47,x_buf[3],4,d);//¸©Ñö½ÇËÙ¶È4
-	OLED_ShowCHinese(63,x_buf[3],5,d);
-	OLED_ShowCHinese(79,x_buf[3],9,d);
-	OLED_ShowCHinese(95,x_buf[3],2,d);
-	OLED_ShowCHinese(111,x_buf[3],3,d);
- }
- 
- if(x_buf[4]!=0xff)
- {
-	if(x_buf[4]==0) e=1;else e=0;
-	OLED_ShowCHinese(47,x_buf[4],10,e);	//º½ÏòÏñËØ²î5
-	OLED_ShowCHinese(63,x_buf[4],11,e);
-	OLED_ShowCHinese(79,x_buf[4],17,e);
-	OLED_ShowCHinese(95,x_buf[4],20,e);
-	OLED_ShowCHinese(111,x_buf[4],21,e);
- }
- 
- if(x_buf[5]!=0xff)
- {
-	if(x_buf[5]==0) f=1;else f=0;
-	OLED_ShowCHinese(47,x_buf[5],4,f);		//¸©ÑöÏñËØ²î6
-	OLED_ShowCHinese(63,x_buf[5],5,f);
-	OLED_ShowCHinese(79,x_buf[5],17,f);
-	OLED_ShowCHinese(95,x_buf[5],20,f);
-	OLED_ShowCHinese(111,x_buf[5],21,f);
- }
- 
-  if(index==4)
- {
-	OLED_ShowCHinese(47,6,22,1);		
-	OLED_ShowCHinese(63,6,22,1);
-	OLED_ShowCHinese(79,6,22,1);
-	OLED_ShowCHinese(95,6,22,1);
-	OLED_ShowCHinese(111,6,22,1);
- }else if(index==5)
- {
-	OLED_ShowCHinese(47,3,22,1);		
-	OLED_ShowCHinese(63,3,22,1);
-	OLED_ShowCHinese(79,3,22,1);
-	OLED_ShowCHinese(95,3,22,1);
-	OLED_ShowCHinese(111,3,22,1);
-	 
-	OLED_ShowCHinese(47,6,22,1);		
-	OLED_ShowCHinese(63,6,22,1);
-	OLED_ShowCHinese(79,6,22,1);
-	OLED_ShowCHinese(95,6,22,1);
-	OLED_ShowCHinese(111,6,22,1);
- }
+//	 OLED_DrawBMP(13,0,32+13,2,BMP1);
+//	
+// if(x_buf[0]!=0xff)
+// { 
+//	 if(x_buf[0]==0) a=1 ;else a=0;
+//	OLED_ShowCHinese(47,x_buf[0],22,a);//º½Ïò½Ç 1
+//	OLED_ShowCHinese(63,x_buf[0],10,a);//º½Ïò½Ç 1
+//  OLED_ShowCHinese(79,x_buf[0],11,a);
+//  OLED_ShowCHinese(95,x_buf[0],9,a);
+//	OLED_ShowCHinese(111,x_buf[0],22,a);//º½Ïò½Ç 1
+// }
+//	
+// if(x_buf[1]!=0xff)
+// {
+//	  if(x_buf[1]==0) b=1;else b=0;
+//	OLED_ShowCHinese(47,x_buf[1],22,b);//º½Ïò½Ç 1
+//	OLED_ShowCHinese(63,x_buf[1],4,b);//¸©Ñö½Ç  2
+//	OLED_ShowCHinese(79,x_buf[1],5,b);
+//	OLED_ShowCHinese(95,x_buf[1],9,b);
+//	OLED_ShowCHinese(111,x_buf[1],22,b);//º½Ïò½Ç 1
+// }
+// if(x_buf[2]!=0xff)
+// {
+//	if(x_buf[2]==0) c=1;else c=0;
+//	OLED_ShowCHinese(47,x_buf[2],10,c);//º½Ïò½ÇËÙ¶È 3
+//	OLED_ShowCHinese(63,x_buf[2],11,c);
+//	OLED_ShowCHinese(79,x_buf[2],9,c);
+//	OLED_ShowCHinese(95,x_buf[2],2,c);
+//	OLED_ShowCHinese(111,x_buf[2],3,c);
+// }
+// 
+// if(x_buf[3]!=0xff)
+// {
+//	if(x_buf[3]==0) d=1;else d=0;
+//	OLED_ShowCHinese(47,x_buf[3],4,d);//¸©Ñö½ÇËÙ¶È4
+//	OLED_ShowCHinese(63,x_buf[3],5,d);
+//	OLED_ShowCHinese(79,x_buf[3],9,d);
+//	OLED_ShowCHinese(95,x_buf[3],2,d);
+//	OLED_ShowCHinese(111,x_buf[3],3,d);
+// }
+// 
+// if(x_buf[4]!=0xff)
+// {
+//	if(x_buf[4]==0) e=1;else e=0;
+//	OLED_ShowCHinese(47,x_buf[4],10,e);	//º½ÏòÏñËØ²î5
+//	OLED_ShowCHinese(63,x_buf[4],11,e);
+//	OLED_ShowCHinese(79,x_buf[4],17,e);
+//	OLED_ShowCHinese(95,x_buf[4],20,e);
+//	OLED_ShowCHinese(111,x_buf[4],21,e);
+// }
+// 
+// if(x_buf[5]!=0xff)
+// {
+//	if(x_buf[5]==0) f=1;else f=0;
+//	OLED_ShowCHinese(47,x_buf[5],4,f);		//¸©ÑöÏñËØ²î6
+//	OLED_ShowCHinese(63,x_buf[5],5,f);
+//	OLED_ShowCHinese(79,x_buf[5],17,f);
+//	OLED_ShowCHinese(95,x_buf[5],20,f);
+//	OLED_ShowCHinese(111,x_buf[5],21,f);
+// }
+// 
+//  if(index==4)
+// {
+//	OLED_ShowCHinese(47,6,22,1);		
+//	OLED_ShowCHinese(63,6,22,1);
+//	OLED_ShowCHinese(79,6,22,1);
+//	OLED_ShowCHinese(95,6,22,1);
+//	OLED_ShowCHinese(111,6,22,1);
+// }else if(index==5)
+// {
+//	OLED_ShowCHinese(47,3,22,1);		
+//	OLED_ShowCHinese(63,3,22,1);
+//	OLED_ShowCHinese(79,3,22,1);
+//	OLED_ShowCHinese(95,3,22,1);
+//	OLED_ShowCHinese(111,3,22,1);
+//	 
+//	OLED_ShowCHinese(47,6,22,1);		
+//	OLED_ShowCHinese(63,6,22,1);
+//	OLED_ShowCHinese(79,6,22,1);
+//	OLED_ShowCHinese(95,6,22,1);
+//	OLED_ShowCHinese(111,6,22,1);
+// }
 
- 
+// 
 
-	//////
-  OLED_ShowString(0,3,"       ");
-	sprintf(ptr,"%3.2f",parameter/100);
- 
-	OLED_ShowString(0,3,(u8 *)ptr);
- /////////////
- 
- if(index==2||index==3)
- {
-	OLED_ShowCHinese(0,6,23,0);
-  OLED_ShowString_816(16,6,"/ S");
- }
- else if(index==0||index==1)
- {
-	 OLED_ShowCHinese(0,6,23,1);
-	 OLED_ShowString_816(16,6,"   ");
- }else
- {
-	 OLED_ShowString_816(0,6,"      ");
-	 OLED_ShowString(0,6,"PIXEL");
- }
- 
- if(page==1)
- { OLED_ShowString(0,1,"       ");
-	 OLED_ShowString(0,1," x 0.01");
- }
- else if(page==2)
- {
-	 OLED_ShowString(0,1,"       ");
-	 OLED_ShowString(0,1," x 0.1");
- }
-  else if(page==3)
- {
-	 OLED_ShowString(0,1,"       ");
-	 OLED_ShowString(0,1," x 1");
- }
-  else if(page==4)
- {
-	 OLED_ShowString(0,1,"       ");
-	 OLED_ShowString(0,1," x 10");
- }
-  else if(page==5)
- {
-	 OLED_ShowString(0,1,"       ");
-	 OLED_ShowString(0,1," x 100 ");
- }
- else
-	 OLED_ShowString(0,1,"       ");
-}
+//	//////
+//  OLED_ShowString(0,3,"       ");
+//	sprintf(ptr,"%3.2f",parameter/100);
+// 
+//	OLED_ShowString(0,3,(u8 *)ptr);
+// /////////////
+// 
+// if(index==2||index==3)
+// {
+//	OLED_ShowCHinese(0,6,23,0);
+//  OLED_ShowString_816(16,6,"/ S");
+// }
+// else if(index==0||index==1)
+// {
+//	 OLED_ShowCHinese(0,6,23,1);
+//	 OLED_ShowString_816(16,6,"   ");
+// }else
+// {
+//	 OLED_ShowString_816(0,6,"      ");
+//	 OLED_ShowString(0,6,"PIXEL");
+// }
+// 
+// if(page==1)
+// { OLED_ShowString(0,1,"       ");
+//	 OLED_ShowString(0,1," x 0.01");
+// }
+// else if(page==2)
+// {
+//	 OLED_ShowString(0,1,"       ");
+//	 OLED_ShowString(0,1," x 0.1");
+// }
+//  else if(page==3)
+// {
+//	 OLED_ShowString(0,1,"       ");
+//	 OLED_ShowString(0,1," x 1");
+// }
+//  else if(page==4)
+// {
+//	 OLED_ShowString(0,1,"       ");
+//	 OLED_ShowString(0,1," x 10");
+// }
+//  else if(page==5)
+// {
+//	 OLED_ShowString(0,1,"       ");
+//	 OLED_ShowString(0,1," x 100 ");
+// }
+// else
+//	 OLED_ShowString(0,1,"       ");
+//}
 
 
 

@@ -29,6 +29,7 @@
 .\objects\bsp.o: ..\lib\STM32F10x_StdPeriph_Driver\inc\stm32f10x_usart.h
 .\objects\bsp.o: ..\lib\STM32F10x_StdPeriph_Driver\inc\stm32f10x_wwdg.h
 .\objects\bsp.o: ..\lib\STM32F10x_StdPeriph_Driver\inc\misc.h
+.\objects\bsp.o: ..\lib\alg\fifo_buffer.h
 .\objects\bsp.o: ..\app\oled.h
 .\objects\bsp.o: d:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 .\objects\bsp.o: ..\app\oo_oled.h

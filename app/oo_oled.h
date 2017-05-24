@@ -22,6 +22,31 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x.h"
+     
+#define POS_CH_LOGO_X 32
+#define POS_CH_LOGO_Y 0
+
+#define POS_CH_MD_X 0
+#define POS_CH_MD_Y 0
+#define POS_CH_AL_X 88
+#define POS_CH_AL_Y 0
+#define POS_CH_VT_X 0
+#define POS_CH_VT_Y 2
+#define POS_CH_CR_X 0
+#define POS_CH_CR_Y 4
+#define POS_CH_TP_X 0
+#define POS_CH_TP_Y 6
+
+#define POS_CH_HI_X 0
+#define POS_CH_HI_Y 0
+#define POS_CH_LAT_X 0
+#define POS_CH_LAT_Y 2
+#define POS_CH_LONG_X 0
+#define POS_CH_LONG_Y 6
+
+#define POS_CH_ATT_X 0
+#define POS_CH_ATT_Y 0
+
 typedef void (*wr_byte_t)(uint8_t data, uint8_t cmd);
 struct oo_oled
 {
@@ -87,14 +112,19 @@ void oled_init(void);
 void oled_clear(void);
 void oled_draw_point(u8 x,u8 y,u8 t);
 void oled_fill(u8 x1,u8 y1,u8 x2,u8 y2,u8 dot);
-void oled_show_char(u8 x,u8 y,u8 chr);
-void oled_show_number(u8 x,u8 y,u32 num,u8 len,u8 size);
-void oled_show_string(u8 x,u8 y, char *p);	 
+void oled_show_char(u8 x,u8 y,u8 chr,u8 size,u8 mode,const unsigned char ch[]);
+void oled_show_number(u8 x,u8 y,u32 num,u8 size,const unsigned char ch[]);
+void oled_show_string(u8 x,u8 y, char *p,u8 size,const unsigned char ch[]);	 
 void oled_set_pos(unsigned char x, unsigned char y);
 void oled_show_chinese(u8 x,u8 y,u8 no,u8 mode);
 void oled_draw_bmp(unsigned char x0, unsigned char y0,unsigned char x1, unsigned char y1,unsigned char BMP[]);
 void oled_init_display(void);
 void oled_show_char_8x16(u8 x,u8 y,u8 chr);
+
+void olde242_ch_logo_display(void);
+void olde242_ch_init_display(void);
+void oled_show_float(u8 x,u8 y,float num,u8 size,const unsigned char ch[],const char fm[]);
+
 
 #ifdef __cplusplus
 }

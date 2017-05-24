@@ -4,17 +4,22 @@
 #include "oo_oled.h"
 
 
+
 GPIO_InitTypeDef GPIO_InitStructure;
 USART_InitTypeDef USART_InitStructure;
 ADC_InitTypeDef ADC_InitStructure;
 DMA_InitTypeDef DMA_InitStructure;
 __IO uint16_t ADCConvertedValue;
 
+t_fifo_buffer com_fifo;
+
 #define ADC1_DR_Address    ((uint32_t)0x4001244C)
 
 struct di_data di_value;
-struct display_data dsp_data;
-struct com_send_data com_sdata = {1,1,{0,0},0};
+struct display_data dsp_data = {0,0,0,0,0,0,0,0,0,0,0};
+struct com_send_data com_sdata = {0xaa,0x44,0xc2,0x01,0x01,0x04,{0,0},0};
+
+uint8_t com_rev_buf[COM_REV_BUF_LEN];
 
 void di_init(u32 init);
 void adc_init(void);
@@ -393,6 +398,8 @@ void spi_init(void)
 	oled_242_wr_byte(0xAF,OLED_CMD); /*display ON*/ 
 	oled_clear();
 	oled_set_pos(0,0);
+    olde242_ch_logo_display();
+    
 }
 void delay_ms(uint16_t t)
 {

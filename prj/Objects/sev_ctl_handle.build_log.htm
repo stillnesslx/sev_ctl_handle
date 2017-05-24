@@ -26,10 +26,15 @@ Project File Date:  05/17/2017
 
 <h2>Output:</h2>
 Build target 'Target 1'
-compiling oo_oled.c...
+compiling main.c...
+..\app\main.c(230): warning:  #550-D: variable "rcrc" was set but never used
+                  uint32_t crc = 0,rcrc;
+..\app\main.c: 1 warning, 0 errors
+compiling bsp.c...
+compiling comtest.c...
 linking...
-Program Size: Code=51786 RO-data=6266 RW-data=1792 ZI-data=18400  
-".\Objects\sev_ctl_handle.axf" - 0 Error(s), 0 Warning(s).
+Program Size: Code=56230 RO-data=8198 RW-data=1808 ZI-data=18512  
+".\Objects\sev_ctl_handle.axf" - 0 Error(s), 1 Warning(s).
 
 <h2>Collection of Component include folders:</h2>
   E:\work\keil\sev_ctl_handle\prj\RTE
